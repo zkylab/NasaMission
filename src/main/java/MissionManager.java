@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MissionManager {
@@ -31,7 +33,7 @@ public class MissionManager {
      * @return on map or not
      */
     public boolean checkCoordinate(Coordinate coordinate) {
-        return coordinate.getX() < mapSize.get(0) || coordinate.getY() < mapSize.get(1);
+        return coordinate.getX() < mapSize.get(0) && coordinate.getY() < mapSize.get(1);
     }
 
     /**
@@ -66,6 +68,38 @@ public class MissionManager {
         return numberOfRovers;
     }
 
+    private boolean checkInputWithRegex(String target, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(target);
+        return matcher.matches();
+    }
+
+    private String getDirection(int indexRover){
+        boolean invalid;
+        String directionPattern = "^[LRM]{1,}$";
+        String direction ="";
+        do {
+            System.out.println("What is the directions of this mission for Rover-" + indexRover + ". Ex: LLMMLMLM");
+            direction = nasaCommunicator.nextLine();
+            invalid = checkInputWithRegex(direction, directionPattern);
+        } while (invalid);
+        return direction;
+    }
+
+    private String[] getInitialRoverPlace(int indexRover) {
+        boolean invalid;
+        String initialRoverPattern = "\\d\\s\\d\\s\\w";
+        String receivedInitialInfo = "";
+        do {
+            System.out.println("What is the initial coordinate and compass and of Rover-" + indexRover + ". Ex: 1 2 N");
+            receivedInitialInfo = nasaCommunicator.nextLine();
+            invalid = checkInputWithRegex(receivedInitialInfo, initialRoverPattern);
+        } while (invalid);
+
+        System.out.println("You mean = " + receivedInitialInfo);
+        return receivedInitialInfo.split(" ");
+    }
+
     /**
      * Gathering necessary inputs which are related to operational rovers.
      *
@@ -75,12 +109,9 @@ public class MissionManager {
     public ArrayList<Rover> roverCreator(int numberOfRovers) {
         // Fill all rovers and their directives
         for (int k = 0; k < numberOfRovers; k++) {
-            System.out.println("What is the initial coordinate and compass and of Rover-" + k + ". Ex: 1 2 N");
-            String receivedInitialInfo = nasaCommunicator.nextLine();
-            System.out.println("You mean = " + receivedInitialInfo);
-            String[] recevivedInitalInfoArray = receivedInitialInfo.split(" ");
-            Coordinate coordinate = new Coordinate(Integer.parseInt(recevivedInitalInfoArray[0]), Integer.parseInt(recevivedInitalInfoArray[1]));
-            char roverInitialCompassLetter = recevivedInitalInfoArray[2].charAt(0);
+            String[] receiveInitialInfoArray = getInitialRoverPlace(k);
+            Coordinate coordinate = new Coordinate(Integer.parseInt(receiveInitialInfoArray[0]), Integer.parseInt(receiveInitialInfoArray[1]));
+            char roverInitialCompassLetter = receiveInitialInfoArray[2].charAt(0);
             CardinalCompass initialRotation = switch (roverInitialCompassLetter) {
                 case 'N' -> CardinalCompass.NORTH;
                 case 'E' -> CardinalCompass.EAST;
@@ -88,8 +119,7 @@ public class MissionManager {
                 case 'W' -> CardinalCompass.WEST;
                 default -> throw new IllegalStateException("Unexpected value: " + roverInitialCompassLetter);
             };
-            System.out.println("What is the directions of this mission for Rover-" + k + ". Ex: LLMMLMLM");
-            String direction = nasaCommunicator.nextLine();
+            String direction = getDirection(k);
             Rover rover = new Rover(coordinate, initialRotation, new CardinalCompassManager());
             rover.setGuide(direction);
             rovers.add(rover);

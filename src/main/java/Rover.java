@@ -1,7 +1,5 @@
 public class Rover {
     private Coordinate currentCoordinate;
-
-
     private CardinalCompass currentRotation;
     private CardinalCompassManager cardinalCompassManager;
     private char[] guide;

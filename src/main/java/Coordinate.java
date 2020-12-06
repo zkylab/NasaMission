@@ -22,4 +22,9 @@ public class Coordinate {
     public void setY(int y) {
         this.y = y;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.getX() == ((Coordinate) obj).getX() && this.getY() == ((Coordinate) obj).getY();
+    }
 }
