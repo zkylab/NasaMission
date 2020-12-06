@@ -1,2 +1,2 @@
 # Mars
-Let's go to the Mars!
+Let's go to Mars!
