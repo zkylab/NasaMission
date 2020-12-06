@@ -9,7 +9,7 @@ public class CardinalCompassManager {
         int movement = switch (where) {
             case 'L' -> -1;
             case 'R' -> +1;
-            default -> 0;
+            default -> throw new IllegalStateException("Unexpected value: " + where);
         };
         int newCompassIndex = currentCompassIndex + movement;
         if(currentCompassIndex + movement < 0){
